@@ -783,6 +783,7 @@ pub const MSG_TRUNC: c_int = 32;
 pub const MSG_DONTWAIT: c_int = 64;
 pub const MSG_WAITALL: c_int = 256;
 pub const SCM_RIGHTS: c_int = 1;
+pub const SCM_CREDENTIALS: c_int = 2;
 pub const SHUT_RD: c_int = 0;
 pub const SHUT_WR: c_int = 1;
 pub const SHUT_RDWR: c_int = 2;
@@ -821,8 +822,6 @@ pub const SOCK_CLOEXEC: c_int = 0o2_000_000;
 pub const SOCK_SEQPACKET: c_int = 5;
 pub const SOL_SOCKET: c_int = 1;
 pub const SOMAXCONN: c_int = 128;
-pub const SCM_RIGHTS: c_int = 1;
-pub const SCM_CREDENTIALS: c_int = 2;
 
 // sys/termios.h
 pub const VEOF: usize = 0;
