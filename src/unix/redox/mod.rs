@@ -1027,6 +1027,35 @@ f! {
     pub {const} fn CMSG_SPACE(len: c_uint) -> c_uint {
         (CMSG_ALIGN(len as size_t) + CMSG_ALIGN(mem::size_of::<cmsghdr>())) as c_uint
     }
+    pub {const} fn CMSG_DATA(cmsg: *const cmsghdr) -> *mut c_uchar {
+        unsafe { (cmsg as *mut c_uchar).offset(CMSG_ALIGN(mem::size_of::<cmsghdr>()) as isize) }
+    }
+    pub {const} fn CMSG_NXTHDR(mhdr: *const msghdr, cmsg: *const cmsghdr) -> *mut cmsghdr {
+        if cmsg.is_null() {
+            return CMSG_FIRSTHDR(mhdr);
+        };
+
+        unsafe {
+            let next = cmsg as usize
+                + CMSG_ALIGN((*cmsg).cmsg_len as usize)
+                + CMSG_ALIGN(mem::size_of::<cmsghdr>());
+            let max = (*mhdr).msg_control as usize + (*mhdr).msg_controllen as usize;
+            if next > max {
+                0 as *mut cmsghdr
+            } else {
+                (cmsg as usize + CMSG_ALIGN((*cmsg).cmsg_len as usize)) as *mut cmsghdr
+            }
+        }
+    }
+    pub {const} fn CMSG_FIRSTHDR(mhdr: *const msghdr) -> *mut cmsghdr {
+        unsafe {
+            if (*mhdr).msg_controllen as usize >= mem::size_of::<cmsghdr>() {
+                (*mhdr).msg_control as *mut cmsghdr
+            } else {
+                0 as *mut cmsghdr
+            }
+        }
+    }
 
     // wait.h
     pub fn FD_CLR(fd: c_int, set: *mut fd_set) -> () {
@@ -1241,9 +1270,6 @@ extern "C" {
     pub fn setrlimit(resource: c_int, rlim: *const crate::rlimit) -> c_int;
 
     // sys/socket.h
-    pub fn CMSG_DATA(cmsg: *const cmsghdr) -> *mut c_uchar;
-    pub fn CMSG_FIRSTHDR(mhdr: *const msghdr) -> *mut cmsghdr;
-    pub fn CMSG_NXTHDR(mhdr: *const msghdr, cmsg: *const cmsghdr) -> *mut cmsghdr;
     pub fn bind(
         socket: c_int,
         address: *const crate::sockaddr,
